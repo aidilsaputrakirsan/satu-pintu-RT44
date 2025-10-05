@@ -6,7 +6,7 @@
 const API_CONFIG = {
   // Web App URL dari Google Apps Script
   // Format: https://script.google.com/macros/s/[SCRIPT_ID]/exec
-  BASE_URL: 'https://script.google.com/macros/s/AKfycbz-33aowGoJ5cfORDQDjqTexQLSP36kSjcB_lOFGLxpdGMpi-75BWvk-1NxvTBUPSbtjw/exec',
+  BASE_URL: 'https://script.google.com/macros/s/AKfycbwNkMiJ1lucpl9_pxBUuNtTv5zUywBrqqcOeRCogykpSxqvmWAEriDlpx_PFDC8QvkpAQ/exec',
   
   // App Settings
   APP_NAME: 'Sistem Administrasi RT 44',

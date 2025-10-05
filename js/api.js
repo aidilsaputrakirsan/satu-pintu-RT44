@@ -1,25 +1,29 @@
 // ============================================
-// API.JS - API Service Layer (CORS Fixed)
+// API.JS - API Service Layer (JSONP)
 // ============================================
 
 const API = {
   
-  // Call API using script tag injection (JSONP-like)
+  // Call API using JSONP (script tag injection)
   async call(action, data = {}) {
     return new Promise((resolve, reject) => {
-      const callbackName = 'apiCallback_' + Date.now();
-      const params = new URLSearchParams({
-        action: action,
-        data: JSON.stringify(data),
-        callback: callbackName
-      });
+      const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       
+      // Create callback function
       window[callbackName] = function(response) {
         delete window[callbackName];
         document.body.removeChild(script);
         resolve(response);
       };
       
+      // Build URL with parameters
+      const params = new URLSearchParams({
+        action: action,
+        data: JSON.stringify(data),
+        callback: callbackName
+      });
+      
+      // Create script tag
       const script = document.createElement('script');
       script.src = `${API_CONFIG.BASE_URL}?${params}`;
       script.onerror = () => {
