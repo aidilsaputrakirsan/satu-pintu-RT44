@@ -1,85 +1,40 @@
 // ============================================
-// API.JS - API Service Layer
+// API.JS - API Service Layer (CORS Fixed)
 // ============================================
 
 const API = {
   
-  // Call Google Apps Script API
+  // Call API using script tag injection (JSONP-like)
   async call(action, data = {}) {
-    try {
-      const response = await fetch(API_CONFIG.BASE_URL, {
-        method: 'POST',
-        mode: 'no-cors', // Important for GAS
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: action,
-          ...data
-        })
+    return new Promise((resolve, reject) => {
+      const callbackName = 'apiCallback_' + Date.now();
+      const params = new URLSearchParams({
+        action: action,
+        data: JSON.stringify(data),
+        callback: callbackName
       });
       
-      // Note: no-cors means we can't read response
-      // Workaround: use redirect parameter
-      return { success: true };
-    } catch (error) {
-      console.error('API Error:', error);
-      return { success: false, message: error.message };
-    }
-  },
-  
-  // Alternative: Using redirect technique for response
-  async callWithResponse(action, data = {}) {
-    return new Promise((resolve, reject) => {
-      const url = API_CONFIG.BASE_URL;
-      const payload = {
-        action: action,
-        ...data
+      window[callbackName] = function(response) {
+        delete window[callbackName];
+        document.body.removeChild(script);
+        resolve(response);
       };
       
-      // Use form submit technique
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = url;
-      form.target = 'api_iframe';
-      form.style.display = 'none';
-      
-      const input = document.createElement('input');
-      input.name = 'payload';
-      input.value = JSON.stringify(payload);
-      form.appendChild(input);
-      
-      document.body.appendChild(form);
-      
-      // Create hidden iframe
-      let iframe = document.getElementById('api_iframe');
-      if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'api_iframe';
-        iframe.name = 'api_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-      }
-      
-      iframe.onload = () => {
-        try {
-          const response = iframe.contentWindow.document.body.textContent;
-          const data = JSON.parse(response);
-          resolve(data);
-        } catch (error) {
-          reject(error);
-        } finally {
-          document.body.removeChild(form);
-        }
+      const script = document.createElement('script');
+      script.src = `${API_CONFIG.BASE_URL}?${params}`;
+      script.onerror = () => {
+        delete window[callbackName];
+        document.body.removeChild(script);
+        reject(new Error('API call failed'));
       };
       
-      form.submit();
+      document.body.appendChild(script);
     });
   },
   
   // AUTH APIs
-  login(username, password) {
-    return this.callWithResponse('login', { username, password });
+  async login(username, password) {
+    return this.call('login', { username, password });
   },
   
   changePassword(username, oldPassword, newPassword) {
