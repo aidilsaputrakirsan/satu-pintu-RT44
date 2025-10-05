@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Layanan Lainnya - Satu Pintu RT 44</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-warning text-dark py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <h4 class="mb-0">
+                        <i class="bi bi-gear-fill me-2"></i>
+                        Form Layanan Lainnya
+                    </h4>
+                </div>
+                <div class="col-6 text-end">
+                    <a href="index.html" class="btn btn-outline-dark">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Form Card -->
+                <div class="card shadow">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0 text-center">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            Formulir Layanan Administrasi Lainnya
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Alert Info -->
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Petunjuk:</strong> Form ini untuk keperluan administrasi yang tidak termasuk dalam kategori Surat Pengantar atau Blangko Pernyataan.
+                        </div>
+
+                        <!-- Form -->
+                        <form id="formLain" enctype="multipart/form-data">
+                            <!-- Nama Lengkap -->
+                            <div class="mb-3">
+                                <label for="namaLengkap" class="form-label fw-bold">
+                                    <i class="bi bi-person-fill me-1"></i>
+                                    Nama Lengkap <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="namaLengkap" name="namaLengkap" required placeholder="Masukkan nama lengkap sesuai KTP">
+                            </div>
+
+                            <!-- Nomor Rumah -->
+                            <div class="mb-3">
+                                <label for="nomorRumah" class="form-label fw-bold">
+                                    <i class="bi bi-house-fill me-1"></i>
+                                    Nomor Rumah <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nomorRumah" name="nomorRumah" required placeholder="Contoh: 44A, 15B, atau 7">
+                            </div>
+
+                            <!-- Jenis Keperluan -->
+                            <div class="mb-3">
+                                <label for="jenisKeperluan" class="form-label fw-bold">
+                                    <i class="bi bi-file-earmark-text-fill me-1"></i>
+                                    Jenis Keperluan <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="jenisKeperluan" name="jenisKeperluan" required>
+                                    <option value="">Pilih jenis keperluan</option>
+                                    <option value="Surat Keterangan Usaha">Surat Keterangan Usaha</option>
+                                    <option value="Surat Keterangan Tidak Mampu">Surat Keterangan Tidak Mampu</option>
+                                    <option value="Surat Keterangan Domisili Usaha">Surat Keterangan Domisili Usaha</option>
+                                    <option value="Surat Rekomendasi">Surat Rekomendasi</option>
+                                    <option value="Surat Keterangan Kelahiran">Surat Keterangan Kelahiran</option>
+                                    <option value="Surat Keterangan Kematian">Surat Keterangan Kematian</option>
+                                    <option value="Pengaduan/Keluhan">Pengaduan/Keluhan</option>
+                                    <option value="Lainnya">Lainnya (sebutkan di keterangan)</option>
+                                </select>
+                            </div>
+
+                            <!-- Keterangan Lengkap -->
+                            <div class="mb-3">
+                                <label for="keterangan" class="form-label fw-bold">
+                                    <i class="bi bi-chat-text-fill me-1"></i>
+                                    Keterangan Lengkap <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="keterangan" name="keterangan" rows="5" required placeholder="Jelaskan secara detail keperluan Anda, maksud dan tujuan, serta informasi tambahan yang diperlukan..."></textarea>
+                                <div class="form-text">
+                                    <i class="bi bi-lightbulb me-1"></i>
+                                    Semakin detail informasi yang diberikan, semakin mudah kami membantu Anda
+                                </div>
+                            </div>
+
+                            <!-- Nomor Telepon -->
+                            <div class="mb-3">
+                                <label for="nomorTelepon" class="form-label fw-bold">
+                                    <i class="bi bi-telephone-fill me-1"></i>
+                                    Nomor Telepon <span class="text-danger">*</span>
+                                </label>
+                                <input type="tel" class="form-control" id="nomorTelepon" name="nomorTelepon" required placeholder="Contoh: 08123456789">
+                                <div class="form-text">
+                                    Nomor telepon aktif untuk dihubungi
+                                </div>
+                            </div>
+
+                            <!-- Upload Files Section -->
+                            <div class="row">
+                                <!-- Upload KTP -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="uploadKTP" class="form-label fw-bold">
+                                        <i class="bi bi-credit-card-fill me-1"></i>
+                                        Upload KTP <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="file" class="form-control" id="uploadKTP" name="uploadKTP" required accept=".jpg,.jpeg,.png,.pdf">
+                                    <div class="form-text">
+                                        Format: JPG, PNG, PDF (maks. 5MB)
+                                    </div>
+                                </div>
+
+                                <!-- Upload Dokumen Pendukung -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="uploadDokumen" class="form-label fw-bold">
+                                        <i class="bi bi-file-earmark-fill me-1"></i>
+                                        Upload Dokumen Pendukung <span class="text-muted">(Opsional)</span>
+                                    </label>
+                                    <input type="file" class="form-control" id="uploadDokumen" name="uploadDokumen" accept=".jpg,.jpeg,.png,.pdf">
+                                    <div class="form-text">
+                                        Upload dokumen yang mendukung keperluan Anda (jika ada)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Prioritas -->
+                            <div class="mb-3">
+                                <label for="prioritas" class="form-label fw-bold">
+                                    <i class="bi bi-flag-fill me-1"></i>
+                                    Prioritas
+                                </label>
+                                <select class="form-select" id="prioritas" name="prioritas">
+                                    <option value="Normal">Normal (3-5 hari kerja)</option>
+                                    <option value="Mendesak">Mendesak (1-2 hari kerja)</option>
+                                    <option value="Sangat Mendesak">Sangat Mendesak (hari ini)</option>
+                                </select>
+                                <div class="form-text text-info">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Untuk prioritas mendesak, harap sertakan alasan di keterangan
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-warning btn-lg text-dark" id="submitBtn">
+                                    <i class="bi bi-send-fill me-2"></i>
+                                    Kirim Formulir
+                                </button>
+                            </div>
+
+                            <!-- Loading Spinner (Hidden by default) -->
+                            <div class="text-center mt-3" id="loadingSpinner" style="display: none;">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Sedang mengirim data...</p>
+                            </div>
+                        </form>
+
+                        <!-- Alert Messages -->
+                        <div id="alertSuccess" class="alert alert-success mt-3" style="display: none;" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>✅ Data berhasil dikirim!</strong> Silakan tunggu proses dari RT. Anda akan dihubungi melalui kontak yang tersedia.
+                        </div>
+
+                        <div id="alertError" class="alert alert-danger mt-3" style="display: none;" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>❌ Terjadi kesalahan!</strong> Silakan coba lagi atau hubungi admin RT.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informasi Kontak -->
+                <div class="card mt-4 border-warning">
+                    <div class="card-body">
+                        <h6 class="card-title text-warning">
+                            <i class="bi bi-telephone-fill me-2"></i>
+                            Kontak Darurat
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Ketua RT:</strong></p>
+                                <p class="small text-muted">WA: 08XX-XXXX-XXXX</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Sekretaris RT:</strong></p>
+                                <p class="small text-muted">WA: 08XX-XXXX-XXXX</p>
+                            </div>
+                        </div>
+                        <div class="alert alert-light mt-2 mb-0">
+                            <small><i class="bi bi-clock me-1"></i> Untuk keperluan mendesak di luar jam kerja, hubungi kontak di atas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">© 2024 Satu Pintu RT 44</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
