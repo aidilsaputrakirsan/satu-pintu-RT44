@@ -53,13 +53,126 @@ const API = {
   },
   
   async saveProfil(username, data) {
-    return this.call('saveProfil', { username, data });
+    // Use POST for saveProfil (data bisa besar)
+    return new Promise((resolve, reject) => {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.name = 'save_iframe_' + Date.now();
+      document.body.appendChild(iframe);
+      
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = API_CONFIG.BASE_URL;
+      form.target = iframe.name;
+      form.style.display = 'none';
+      
+      const payload = {
+        action: 'saveProfil',
+        username: username,
+        data: data
+      };
+      
+      const input = document.createElement('textarea');
+      input.name = 'data';
+      input.value = JSON.stringify(payload);
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      
+      let responded = false;
+      iframe.onload = () => {
+        if (responded) return;
+        responded = true;
+        
+        try {
+          const response = iframe.contentWindow.document.body.textContent;
+          const result = JSON.parse(response);
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+          resolve(result);
+        } catch (error) {
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+          reject(error);
+        }
+      };
+      
+      setTimeout(() => {
+        if (!responded) {
+          responded = true;
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+          reject(new Error('Save timeout'));
+        }
+      }, 30000);
+      
+      form.submit();
+    });
   },
   
-  // FILE APIs
+  // FILE APIs - Use POST for file upload (large data)
   async uploadFile(username, fileData, fileName, fileType) {
-    return this.call('uploadFile', { 
-      username, fileData, fileName, fileType 
+    return new Promise((resolve, reject) => {
+      // Create hidden iframe for POST
+      let iframe = document.getElementById('upload_iframe');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'upload_iframe';
+        iframe.name = 'upload_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+      
+      // Create form
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = API_CONFIG.BASE_URL;
+      form.target = 'upload_iframe';
+      form.style.display = 'none';
+      
+      // Add data as hidden inputs
+      const payload = {
+        action: 'uploadFile',
+        username: username,
+        fileData: fileData,
+        fileName: fileName,
+        fileType: fileType
+      };
+      
+      const input = document.createElement('textarea');
+      input.name = 'data';
+      input.value = JSON.stringify(payload);
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      
+      // Handle response
+      let responded = false;
+      iframe.onload = () => {
+        if (responded) return;
+        responded = true;
+        
+        try {
+          const response = iframe.contentWindow.document.body.textContent;
+          const data = JSON.parse(response);
+          document.body.removeChild(form);
+          resolve(data);
+        } catch (error) {
+          document.body.removeChild(form);
+          reject(error);
+        }
+      };
+      
+      // Timeout after 30 seconds
+      setTimeout(() => {
+        if (!responded) {
+          responded = true;
+          document.body.removeChild(form);
+          reject(new Error('Upload timeout'));
+        }
+      }, 30000);
+      
+      form.submit();
     });
   },
   

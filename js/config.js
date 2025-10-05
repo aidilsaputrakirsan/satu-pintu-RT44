@@ -6,7 +6,7 @@
 const API_CONFIG = {
   // Web App URL dari Google Apps Script
   // Format: https://script.google.com/macros/s/[SCRIPT_ID]/exec
-  BASE_URL: 'https://script.google.com/macros/s/AKfycbxTyXhVoO8g9ex5zBFsFW3hW80BxIsp6483nyhLEfyhclP8UccWqX-6QpzkSx5u9doSug/exec',
+  BASE_URL: 'https://script.google.com/macros/s/AKfycbywOytNlavojyfXu1yp5L2Bg3sR53fjudiN0cm9jnkAvglraD4O-ERmXt2r7qyeLkPMYg/exec',
   
   // PENTING: Ganti YOUR_SCRIPT_ID_HERE dengan Script ID yang benar!
   // Cara dapat Script ID:
