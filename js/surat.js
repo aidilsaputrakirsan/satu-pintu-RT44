@@ -35,14 +35,14 @@ const Surat = {
   
   renderBlocked() {
     const content = document.getElementById('contentArea');
-    content.innerHTML = `
+          content.innerHTML = `
       <div class="alert alert-danger">
         <i class="bi bi-x-circle-fill"></i>
         <h5>Tidak Dapat Mengajukan Surat</h5>
         <p>Anda terdaftar sebagai warga kontrak dengan KTP di luar RT 44.</p>
         <p><strong>Silakan urus perpindahan domisili terlebih dahulu ke RT 44 untuk dapat mengajukan surat.</strong></p>
         <hr>
-        <button class="btn btn-primary" onclick="loadDashboard()">Kembali ke Dashboard</button>
+        <button class="btn btn-primary" onclick="event.preventDefault(); loadDashboard(); return false;">Kembali ke Dashboard</button>
       </div>
     `;
   },
@@ -66,7 +66,7 @@ const Surat = {
               <div>
                 <strong>${s.nama_surat}</strong>
               </div>
-              <button class="btn btn-primary btn-sm" onclick="Surat.buat('${s.id_surat}')">
+              <button class="btn btn-primary btn-sm" onclick="event.preventDefault(); Surat.buat('${s.id_surat}'); return false;">
                 <i class="bi bi-pencil"></i> Buat
               </button>
             </div>
@@ -84,7 +84,7 @@ const Surat = {
               <div>
                 <strong>${s.nama_surat.replace('Surat Pernyataan ', '')}</strong>
               </div>
-              <button class="btn btn-success btn-sm" onclick="Surat.buat('${s.id_surat}')">
+              <button class="btn btn-success btn-sm" onclick="event.preventDefault(); Surat.buat('${s.id_surat}'); return false;">
                 <i class="bi bi-pencil"></i> Buat
               </button>
             </div>
@@ -114,7 +114,7 @@ const Surat = {
     
     content.innerHTML = `
       <div class="mb-3">
-        <button class="btn btn-secondary btn-sm" onclick="Surat.loadAjukan()">
+        <button class="btn btn-secondary btn-sm" onclick="event.preventDefault(); Surat.loadAjukan(); return false;">
           <i class="bi bi-arrow-left"></i> Kembali
         </button>
       </div>

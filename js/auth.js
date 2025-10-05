@@ -17,17 +17,8 @@ const Auth = {
         // Save user to local storage
         Utils.saveUser(result.user);
         
-        // Redirect based on role
-        if (result.user.role === 'admin') {
-          window.location.href = 'dashboard.html';
-        } else {
-          // Check if profil lengkap
-          if (result.user.status_profil === 'belum_lengkap') {
-            window.location.href = 'pages/profil.html';
-          } else {
-            window.location.href = 'dashboard.html';
-          }
-        }
+        // Always redirect to dashboard
+        window.location.href = 'dashboard.html';
       } else {
         Utils.showAlert(result.message, 'danger');
       }

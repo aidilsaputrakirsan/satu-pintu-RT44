@@ -91,34 +91,34 @@ function renderSidebar() {
   
   if (currentUser.role === 'admin') {
     sidebar.innerHTML = `
-      <a href="#" class="nav-link active" onclick="loadDashboard()">
+      <a href="#" class="nav-link active" onclick="event.preventDefault(); loadDashboard(); return false;">
         <i class="bi bi-speedometer2"></i> Dashboard
       </a>
-      <a href="#" class="nav-link" onclick="Admin.loadPengajuan()">
+      <a href="#" class="nav-link" onclick="event.preventDefault(); Admin.loadPengajuan(); return false;">
         <i class="bi bi-envelope-fill"></i> Pengajuan Surat
       </a>
-      <a href="#" class="nav-link" onclick="Admin.loadWarga()">
+      <a href="#" class="nav-link" onclick="event.preventDefault(); Admin.loadWarga(); return false;">
         <i class="bi bi-people-fill"></i> Daftar Warga
       </a>
-      <a href="#" class="nav-link" onclick="loadGantiPassword()">
+      <a href="#" class="nav-link" onclick="event.preventDefault(); loadGantiPassword(); return false;">
         <i class="bi bi-key-fill"></i> Ganti Password
       </a>
     `;
   } else {
     sidebar.innerHTML = `
-      <a href="#" class="nav-link active" onclick="loadDashboard()">
+      <a href="#" class="nav-link active" onclick="event.preventDefault(); loadDashboard(); return false;">
         <i class="bi bi-speedometer2"></i> Dashboard
       </a>
-      <a href="#" class="nav-link" onclick="Profil.load()">
+      <a href="#" class="nav-link" onclick="event.preventDefault(); Profil.load(); return false;">
         <i class="bi bi-person-fill"></i> Profil Saya
       </a>
-      <a href="#" class="nav-link" onclick="Surat.loadAjukan()">
+      <a href="#" class="nav-link" onclick="event.preventDefault(); Surat.loadAjukan(); return false;">
         <i class="bi bi-file-earmark-plus"></i> Ajukan Surat
       </a>
-      <a href="#" class="nav-link" onclick="Surat.loadRiwayat()">
+      <a href="#" class="nav-link" onclick="event.preventDefault(); Surat.loadRiwayat(); return false;">
         <i class="bi bi-clock-history"></i> Riwayat Surat
       </a>
-      <a href="#" class="nav-link" onclick="loadGantiPassword()">
+      <a href="#" class="nav-link" onclick="event.preventDefault(); loadGantiPassword(); return false;">
         <i class="bi bi-key-fill"></i> Ganti Password
       </a>
     `;
@@ -179,7 +179,7 @@ async function loadDashboard() {
       <div class="alert alert-warning">
         <i class="bi bi-exclamation-triangle-fill"></i>
         <strong>Perhatian!</strong> Profil Anda belum lengkap. 
-        <a href="#" onclick="Profil.load()">Lengkapi sekarang</a>
+        <a href="#" onclick="event.preventDefault(); Profil.load(); return false;">Lengkapi sekarang</a>
       </div>
       ` : ''}
       
@@ -189,7 +189,7 @@ async function loadDashboard() {
             <div class="card-body">
               <h5><i class="bi bi-file-earmark-plus"></i> Ajukan Surat</h5>
               <p class="text-muted">Buat pengajuan surat pengantar atau pernyataan</p>
-              <button class="btn btn-primary" onclick="Surat.loadAjukan()">Buat Surat</button>
+              <button class="btn btn-primary" onclick="event.preventDefault(); Surat.loadAjukan(); return false;">Buat Surat</button>
             </div>
           </div>
         </div>
@@ -198,7 +198,7 @@ async function loadDashboard() {
             <div class="card-body">
               <h5><i class="bi bi-clock-history"></i> Riwayat Surat</h5>
               <p class="text-muted">Lihat status pengajuan surat Anda</p>
-              <button class="btn btn-secondary" onclick="Surat.loadRiwayat()">Lihat Riwayat</button>
+              <button class="btn btn-secondary" onclick="event.preventDefault(); Surat.loadRiwayat(); return false;">Lihat Riwayat</button>
             </div>
           </div>
         </div>
@@ -256,7 +256,13 @@ function loadGantiPassword() {
 
 // Initialize
 renderSidebar();
-loadDashboard();
+
+// Check if profil belum lengkap, langsung load profil form
+if (currentUser.role === 'warga' && currentUser.status_profil === 'belum_lengkap') {
+  Profil.load();
+} else {
+  loadDashboard();
+}
 </script>
 
 </body>

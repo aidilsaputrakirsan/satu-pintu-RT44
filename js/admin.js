@@ -51,13 +51,13 @@ const Admin = {
                       <td>${p.jenis_surat}</td>
                       <td>${Utils.formatDate(p.tanggal_ajuan)}</td>
                       <td>
-                        <button class="btn btn-sm btn-info" onclick="Admin.lihatDetail('${p.id}')">
+                        <button class="btn btn-sm btn-info" onclick="event.preventDefault(); Admin.lihatDetail('${p.id}'); return false;">
                           <i class="bi bi-eye"></i> Detail
                         </button>
-                        <button class="btn btn-sm btn-success" onclick="Admin.terima('${p.id}')">
+                        <button class="btn btn-sm btn-success" onclick="event.preventDefault(); Admin.terima('${p.id}'); return false;">
                           <i class="bi bi-check"></i> Terima
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="Admin.tolak('${p.id}')">
+                        <button class="btn btn-sm btn-danger" onclick="event.preventDefault(); Admin.tolak('${p.id}'); return false;">
                           <i class="bi bi-x"></i> Tolak
                         </button>
                       </td>
