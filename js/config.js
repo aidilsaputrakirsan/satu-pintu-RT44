@@ -6,7 +6,14 @@
 const API_CONFIG = {
   // Web App URL dari Google Apps Script
   // Format: https://script.google.com/macros/s/[SCRIPT_ID]/exec
-  BASE_URL: 'https://script.google.com/macros/s/AKfycbwNkMiJ1lucpl9_pxBUuNtTv5zUywBrqqcOeRCogykpSxqvmWAEriDlpx_PFDC8QvkpAQ/exec',
+  BASE_URL: 'https://script.google.com/macros/s/AKfycbxTyXhVoO8g9ex5zBFsFW3hW80BxIsp6483nyhLEfyhclP8UccWqX-6QpzkSx5u9doSug/exec',
+  
+  // PENTING: Ganti YOUR_SCRIPT_ID_HERE dengan Script ID yang benar!
+  // Cara dapat Script ID:
+  // 1. Buka Apps Script project
+  // 2. Deploy → Manage deployments
+  // 3. Copy Web app URL
+  // 4. Paste di sini
   
   // App Settings
   APP_NAME: 'Sistem Administrasi RT 44',

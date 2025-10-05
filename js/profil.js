@@ -13,18 +13,24 @@ const Profil = {
   async load() {
     Utils.showLoading();
     
-    const user = Utils.getCurrentUser();
-    const result = await API.getProfil(user.username);
-    
-    Utils.hideLoading();
-    
-    if (result.success && result.data && result.data.nama_kk) {
-      this.uploadedKTP = result.data.files_ktp || [];
-      this.uploadedKK = result.data.files_kk || [];
-      this.uploadedKIA = result.data.files_kia || [];
-      this.dataAnak = result.data.data_anak || [];
-      this.render(result.data);
-    } else {
+    try {
+      const user = Utils.getCurrentUser();
+      const result = await API.getProfil(user.username);
+      
+      Utils.hideLoading();
+      
+      if (result.success && result.data && result.data.nama_kk) {
+        this.uploadedKTP = result.data.files_ktp || [];
+        this.uploadedKK = result.data.files_kk || [];
+        this.uploadedKIA = result.data.files_kia || [];
+        this.dataAnak = result.data.data_anak || [];
+        this.render(result.data);
+      } else {
+        this.render(null);
+      }
+    } catch (error) {
+      Utils.hideLoading();
+      console.error('Error loading profil:', error);
       this.render(null);
     }
   },

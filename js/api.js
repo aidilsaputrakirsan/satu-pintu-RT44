@@ -41,57 +41,57 @@ const API = {
     return this.call('login', { username, password });
   },
   
-  changePassword(username, oldPassword, newPassword) {
-    return this.callWithResponse('changePassword', { 
+  async changePassword(username, oldPassword, newPassword) {
+    return this.call('changePassword', { 
       username, oldPassword, newPassword 
     });
   },
   
   // PROFIL APIs
-  getProfil(username) {
-    return this.callWithResponse('getProfil', { username });
+  async getProfil(username) {
+    return this.call('getProfil', { username });
   },
   
-  saveProfil(username, data) {
-    return this.callWithResponse('saveProfil', { username, data });
+  async saveProfil(username, data) {
+    return this.call('saveProfil', { username, data });
   },
   
   // FILE APIs
-  uploadFile(username, fileData, fileName, fileType) {
-    return this.callWithResponse('uploadFile', { 
+  async uploadFile(username, fileData, fileName, fileType) {
+    return this.call('uploadFile', { 
       username, fileData, fileName, fileType 
     });
   },
   
-  deleteFile(fileId) {
-    return this.callWithResponse('deleteFile', { fileId });
+  async deleteFile(fileId) {
+    return this.call('deleteFile', { fileId });
   },
   
   // SURAT APIs
-  getMasterSurat() {
-    return this.callWithResponse('getMasterSurat');
+  async getMasterSurat() {
+    return this.call('getMasterSurat');
   },
   
-  submitSurat(username, data) {
-    return this.callWithResponse('submitSurat', { username, data });
+  async submitSurat(username, data) {
+    return this.call('submitSurat', { username, data });
   },
   
-  getRiwayatSurat(username) {
-    return this.callWithResponse('getRiwayatSurat', { username });
+  async getRiwayatSurat(username) {
+    return this.call('getRiwayatSurat', { username });
   },
   
   // ADMIN APIs
-  getAllPengajuan(status = null) {
-    return this.callWithResponse('getAllPengajuan', { status });
+  async getAllPengajuan(status = null) {
+    return this.call('getAllPengajuan', { status });
   },
   
-  updateStatusSurat(id, status, catatan, adminUsername) {
-    return this.callWithResponse('updateStatusSurat', { 
+  async updateStatusSurat(id, status, catatan, adminUsername) {
+    return this.call('updateStatusSurat', { 
       id, status, catatan, adminUsername 
     });
   },
   
-  getAllWarga() {
-    return this.callWithResponse('getAllWarga');
+  async getAllWarga() {
+    return this.call('getAllWarga');
   }
 };
