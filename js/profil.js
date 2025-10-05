@@ -1,5 +1,5 @@
 // ============================================
-// PROFIL.JS - Complete Version
+// PROFIL.JS - Complete Clean Version
 // ============================================
 
 const Profil = {
@@ -9,7 +9,6 @@ const Profil = {
   uploadedKIA: [],
   dataAnak: [],
   
-  // Load profil form
   async load() {
     Utils.showLoading();
     
@@ -35,7 +34,6 @@ const Profil = {
     }
   },
   
-  // Render profil form
   render(data = null) {
     const user = Utils.getCurrentUser();
     const content = document.getElementById('contentArea');
@@ -56,7 +54,6 @@ const Profil = {
       ` : ''}
       
       <form id="formProfil">
-        <!-- Status Hunian -->
         <div class="card mb-3">
           <div class="card-header bg-primary text-white">
             <strong>A. Status Kepemilikan/Hunian</strong>
@@ -80,7 +77,6 @@ const Profil = {
           </div>
         </div>
         
-        <!-- Data KK -->
         <div class="card mb-3">
           <div class="card-header bg-primary text-white">
             <strong>B. Data Kepala Keluarga</strong>
@@ -141,7 +137,6 @@ const Profil = {
           </div>
         </div>
         
-        <!-- Alamat -->
         <div class="card mb-3">
           <div class="card-header bg-primary text-white">
             <strong>C. Alamat</strong>
@@ -161,7 +156,6 @@ const Profil = {
           </div>
         </div>
         
-        <!-- Data Istri -->
         <div class="card mb-3">
           <div class="card-header bg-secondary text-white">
             <strong>D. Data Istri (Opsional)</strong>
@@ -199,7 +193,6 @@ const Profil = {
           </div>
         </div>
         
-        <!-- Data Anak -->
         <div class="card mb-3">
           <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
             <strong>E. Data Anak (Opsional)</strong>
@@ -214,14 +207,12 @@ const Profil = {
           </div>
         </div>
 
-        <!-- Upload Dokumen -->
         <div class="card mb-3">
           <div class="card-header bg-success text-white">
             <strong>F. Upload Dokumen <span class="text-warning">* Minimal 1 KTP + 1 KK</span></strong>
             <br><small>Klik area di bawah untuk memilih file dari Google Drive Anda</small>
           </div>
           <div class="card-body">
-            <!-- Upload KTP -->
             <div class="mb-4">
               <label class="form-label fw-bold">Upload KTP (bisa lebih dari 1)</label>
               <div class="upload-area" id="ktpUploadArea" style="cursor: pointer;">
@@ -232,7 +223,6 @@ const Profil = {
               <div id="previewKTP" class="mt-3"></div>
             </div>
             
-            <!-- Upload KK -->
             <div class="mb-4">
               <label class="form-label fw-bold">Upload KK (bisa lebih dari 1)</label>
               <div class="upload-area" id="kkUploadArea" style="cursor: pointer;">
@@ -243,7 +233,6 @@ const Profil = {
               <div id="previewKK" class="mt-3"></div>
             </div>
             
-            <!-- Upload KIA -->
             <div class="mb-4">
               <label class="form-label fw-bold">Upload KIA/Akta (Opsional)</label>
               <div class="upload-area" id="kiaUploadArea" style="cursor: pointer;">
@@ -256,7 +245,6 @@ const Profil = {
           </div>
         </div>
         
-        <!-- Submit -->
         <div class="text-end">
           <button type="submit" class="btn btn-primary btn-lg">
             <i class="bi bi-save"></i> Simpan Profil
@@ -265,44 +253,10 @@ const Profil = {
       </form>
     `;
     
-    // Event listeners
     document.getElementById('statusHunian').addEventListener('change', () => this.handleStatusHunian());
-        const ktpUploadArea = document.querySelector('[onclick*="fileKTP"]');
-        if (ktpUploadArea) {
-          ktpUploadArea.onclick = (e) => {
-            e.preventDefault();
-            this.handleFileUpload(e, 'ktp');
-          };
-        }
-
-        const kkUploadArea = document.querySelector('[onclick*="fileKK"]');
-        if (kkUploadArea) {
-          kkUploadArea.onclick = (e) => {
-            e.preventDefault();
-            this.handleFileUpload(e, 'kk');
-          };
-        }
-
-        const kiaUploadArea = document.querySelector('[onclick*="fileKIA"]');
-        if (kiaUploadArea) {
-          kiaUploadArea.onclick = (e) => {
-            e.preventDefault();
-            this.handleFileUpload(e, 'kia');
-          };
-        }
-
-    // Upload area click handlers - Google Picker
-    document.getElementById('ktpUploadArea').addEventListener('click', (e) => {
-      this.handleFileUpload(e, 'ktp');
-    });
-
-    document.getElementById('kkUploadArea').addEventListener('click', (e) => {
-      this.handleFileUpload(e, 'kk');
-    });
-
-    document.getElementById('kiaUploadArea').addEventListener('click', (e) => {
-      this.handleFileUpload(e, 'kia');
-    });
+    document.getElementById('ktpUploadArea').addEventListener('click', (e) => this.handleFileUpload(e, 'ktp'));
+    document.getElementById('kkUploadArea').addEventListener('click', (e) => this.handleFileUpload(e, 'kk'));
+    document.getElementById('kiaUploadArea').addEventListener('click', (e) => this.handleFileUpload(e, 'kia'));
     document.getElementById('formProfil').addEventListener('submit', (e) => this.submit(e));
     
     this.handleStatusHunian();
@@ -338,36 +292,32 @@ const Profil = {
     event.preventDefault();
     
     try {
-      // Open Google Picker
       const pickedFile = await PickerHelper.uploadFile((progress, message) => {
         console.log(`${progress}% - ${message}`);
       });
       
       if (!pickedFile) {
-        return; // User cancelled
+        return;
       }
       
-      // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
       if (!allowedTypes.includes(pickedFile.mimeType)) {
         Utils.showAlert('Tipe file tidak didukung. Gunakan JPG, PNG, atau PDF', 'danger');
         return;
       }
       
-      // Validate file size (optional, since it's from Drive)
       if (pickedFile.sizeBytes && pickedFile.sizeBytes > API_CONFIG.MAX_FILE_SIZE) {
         Utils.showAlert(`File terlalu besar. Maksimal ${API_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB`, 'danger');
         return;
       }
       
-      // Add to appropriate array
       const fileData = {
         fileId: pickedFile.id,
         fileName: pickedFile.name,
         fileType: pickedFile.mimeType,
         fileUrl: pickedFile.url,
         iconUrl: pickedFile.iconUrl,
-        uploaded: false // Will be moved to RT folder on submit
+        uploaded: false
       };
       
       if (type === 'ktp') {
@@ -484,7 +434,6 @@ const Profil = {
   async submit(e) {
     e.preventDefault();
     
-    // Validate
     if (this.uploadedKTP.length === 0 || this.uploadedKK.length === 0) {
       Utils.showAlert('Minimal harus upload 1 KTP dan 1 KK!', 'danger');
       return;
@@ -492,7 +441,6 @@ const Profil = {
     
     Utils.showLoading();
     
-    // Upload files first
     const ktpUploaded = await this.uploadFiles(this.uploadedKTP);
     const kkUploaded = await this.uploadFiles(this.uploadedKK);
     const kiaUploaded = await this.uploadFiles(this.uploadedKIA);
@@ -541,7 +489,6 @@ const Profil = {
     const user = Utils.getCurrentUser();
     const uploaded = [];
     
-    // Create progress container
     const progressContainer = document.createElement('div');
     progressContainer.id = 'uploadProgressContainer';
     progressContainer.style.cssText = `
@@ -562,18 +509,16 @@ const Profil = {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
-      // Skip if already uploaded
       if (file.uploaded) {
         uploaded.push(file);
         continue;
       }
       
       try {
-        // Create progress element
         const fileProgressId = 'fileProgress_' + i;
         const fileProgressHTML = `
           <div id="${fileProgressId}" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-            <div style="display: flex; justify-content-between; align-items: center; margin-bottom: 5px;">
+            <div style="display: flex; justify-content-between; align-items-center; margin-bottom: 5px;">
               <small style="font-weight: bold;">${file.fileName}</small>
               <small id="${fileProgressId}_status" style="color: #666;">Memproses...</small>
             </div>
@@ -585,14 +530,12 @@ const Profil = {
         
         progressContainer.insertAdjacentHTML('beforeend', fileProgressHTML);
         
-        // Update progress
         const progressBar = document.getElementById(fileProgressId + '_bar');
         const statusEl = document.getElementById(fileProgressId + '_status');
         
         if (progressBar) progressBar.style.width = '50%';
         if (statusEl) statusEl.textContent = 'Memindahkan file...';
         
-        // Call API to move file to RT folder
         const result = await API.moveFile(user.username, file.fileId, file.fileName);
         
         if (result.success) {
@@ -603,10 +546,9 @@ const Profil = {
             uploaded: true
           });
           
-          // Mark as complete
           if (progressBar) progressBar.style.width = '100%';
           if (statusEl) {
-            statusEl.textContent = '✅ Selesai';
+            statusEl.textContent = 'Selesai';
             statusEl.style.color = '#28a745';
           }
         } else {
@@ -616,10 +558,9 @@ const Profil = {
       } catch (error) {
         console.error('Upload error:', error);
         
-        // Show error in progress UI
         const statusEl = document.getElementById('fileProgress_' + i + '_status');
         if (statusEl) {
-          statusEl.textContent = '❌ Error';
+          statusEl.textContent = 'Error';
           statusEl.style.color = '#dc3545';
         }
         
@@ -627,7 +568,6 @@ const Profil = {
       }
     }
     
-    // Remove progress container after 3 seconds
     setTimeout(() => {
       if (document.body.contains(progressContainer)) {
         document.body.removeChild(progressContainer);
