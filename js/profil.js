@@ -1,5 +1,5 @@
 // ============================================
-// PROFIL.JS - Profil & Upload Functions
+// PROFIL.JS - Complete Version
 // ============================================
 
 const Profil = {
@@ -18,7 +18,7 @@ const Profil = {
     
     Utils.hideLoading();
     
-    if (result.success && result.data) {
+    if (result.success && result.data && result.data.nama_kk) {
       this.uploadedKTP = result.data.files_ktp || [];
       this.uploadedKK = result.data.files_kk || [];
       this.uploadedKIA = result.data.files_kia || [];
@@ -193,106 +193,82 @@ const Profil = {
           </div>
         </div>
         
-        <!-- TO BE CONTINUED IN PART 2 -->
+        <!-- Data Anak -->
+        <div class="card mb-3">
+          <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <strong>E. Data Anak (Opsional)</strong>
+            <button type="button" class="btn btn-light btn-sm" onclick="Profil.tambahAnak()">
+              <i class="bi bi-plus-circle"></i> Tambah Anak
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="daftarAnak">
+              <p class="text-muted">Belum ada data anak</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Upload Dokumen -->
+        <div class="card mb-3">
+          <div class="card-header bg-success text-white">
+            <strong>F. Upload Dokumen <span class="text-warning">* Minimal 1 KTP + 1 KK</span></strong>
+          </div>
+          <div class="card-body">
+            <!-- Upload KTP -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Upload KTP (bisa lebih dari 1)</label>
+              <div class="upload-area" onclick="document.getElementById('fileKTP').click()">
+                <i class="bi bi-cloud-upload"></i>
+                <p class="mb-0 mt-2">Klik untuk upload KTP</p>
+                <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
+              </div>
+              <input type="file" id="fileKTP" accept="image/*,.pdf" multiple class="d-none">
+              <div id="previewKTP" class="mt-3"></div>
+            </div>
+            
+            <!-- Upload KK -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Upload KK (bisa lebih dari 1)</label>
+              <div class="upload-area" onclick="document.getElementById('fileKK').click()">
+                <i class="bi bi-cloud-upload"></i>
+                <p class="mb-0 mt-2">Klik untuk upload KK</p>
+                <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
+              </div>
+              <input type="file" id="fileKK" accept="image/*,.pdf" multiple class="d-none">
+              <div id="previewKK" class="mt-3"></div>
+            </div>
+            
+            <!-- Upload KIA -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Upload KIA/Akta (Opsional)</label>
+              <div class="upload-area" onclick="document.getElementById('fileKIA').click()">
+                <i class="bi bi-cloud-upload"></i>
+                <p class="mb-0 mt-2">Klik untuk upload KIA</p>
+                <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
+              </div>
+              <input type="file" id="fileKIA" accept="image/*,.pdf" multiple class="d-none">
+              <div id="previewKIA" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Submit -->
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-save"></i> Simpan Profil
+          </button>
+        </div>
       </form>
     `;
     
     // Event listeners
     document.getElementById('statusHunian').addEventListener('change', () => this.handleStatusHunian());
-    this.handleStatusHunian();
-    
-    // Continue rendering in initUploadAndSubmit()
-    this.initUploadAndSubmit();
-  },
-  
-// ============================================
-// PROFIL.JS - PART 2 (Complete)
-// Gabungkan dengan PART 1
-// ============================================
-
-// Lanjutan dari Profil object...
-
-  initUploadAndSubmit() {
-    // Add upload section and submit button to form
-    const form = document.getElementById('formProfil');
-    
-    form.insertAdjacentHTML('beforeend', `
-      <!-- Data Anak -->
-      <div class="card mb-3">
-        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-          <strong>E. Data Anak (Opsional)</strong>
-          <button type="button" class="btn btn-light btn-sm" onclick="Profil.tambahAnak()">
-            <i class="bi bi-plus-circle"></i> Tambah Anak
-          </button>
-        </div>
-        <div class="card-body">
-          <div id="daftarAnak">
-            <p class="text-muted">Belum ada data anak</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Upload Dokumen -->
-      <div class="card mb-3">
-        <div class="card-header bg-success text-white">
-          <strong>F. Upload Dokumen <span class="text-warning">* Minimal 1 KTP + 1 KK</span></strong>
-        </div>
-        <div class="card-body">
-          <!-- Upload KTP -->
-          <div class="mb-4">
-            <label class="form-label fw-bold">Upload KTP (bisa lebih dari 1)</label>
-            <div class="upload-area" onclick="document.getElementById('fileKTP').click()">
-              <i class="bi bi-cloud-upload"></i>
-              <p class="mb-0 mt-2">Klik untuk upload KTP</p>
-              <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
-            </div>
-            <input type="file" id="fileKTP" accept="image/*,.pdf" multiple class="d-none">
-            <div id="previewKTP" class="mt-3"></div>
-          </div>
-          
-          <!-- Upload KK -->
-          <div class="mb-4">
-            <label class="form-label fw-bold">Upload KK (bisa lebih dari 1)</label>
-            <div class="upload-area" onclick="document.getElementById('fileKK').click()">
-              <i class="bi bi-cloud-upload"></i>
-              <p class="mb-0 mt-2">Klik untuk upload KK</p>
-              <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
-            </div>
-            <input type="file" id="fileKK" accept="image/*,.pdf" multiple class="d-none">
-            <div id="previewKK" class="mt-3"></div>
-          </div>
-          
-          <!-- Upload KIA -->
-          <div class="mb-4">
-            <label class="form-label fw-bold">Upload KIA/Akta (Opsional)</label>
-            <div class="upload-area" onclick="document.getElementById('fileKIA').click()">
-              <i class="bi bi-cloud-upload"></i>
-              <p class="mb-0 mt-2">Klik untuk upload KIA</p>
-              <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
-            </div>
-            <input type="file" id="fileKIA" accept="image/*,.pdf" multiple class="d-none">
-            <div id="previewKIA" class="mt-3"></div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Submit -->
-      <div class="text-end">
-        <button type="submit" class="btn btn-primary btn-lg">
-          <i class="bi bi-save"></i> Simpan Profil
-        </button>
-      </div>
-    `);
-    
-    // File upload handlers
     document.getElementById('fileKTP').addEventListener('change', (e) => this.handleFileUpload(e, 'ktp'));
     document.getElementById('fileKK').addEventListener('change', (e) => this.handleFileUpload(e, 'kk'));
     document.getElementById('fileKIA').addEventListener('change', (e) => this.handleFileUpload(e, 'kia'));
+    document.getElementById('formProfil').addEventListener('submit', (e) => this.submit(e));
     
-    // Form submit
-    form.addEventListener('submit', (e) => this.submit(e));
-    
-    // Render existing data
+    this.handleStatusHunian();
     this.renderDaftarAnak();
     this.renderFilePreview('ktp');
     this.renderFilePreview('kk');
@@ -363,6 +339,8 @@ const Profil = {
       container = document.getElementById('previewKIA');
     }
     
+    if (!container) return;
+    
     container.innerHTML = files.map((file, index) => `
       <div class="file-preview">
         <img src="${file.fileUrl || file.data}" alt="${file.fileName || file.name}">
@@ -394,6 +372,7 @@ const Profil = {
   
   renderDaftarAnak() {
     const container = document.getElementById('daftarAnak');
+    if (!container) return;
     
     if (this.dataAnak.length === 0) {
       container.innerHTML = '<p class="text-muted">Belum ada data anak</p>';
