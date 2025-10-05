@@ -82,6 +82,55 @@ const Utils = {
     });
   },
   
+  // Compress image before upload
+  async compressImage(file, maxWidth = 1024) {
+    return new Promise((resolve, reject) => {
+      // If not image, return as is
+      if (!file.type.startsWith('image/')) {
+        this.fileToBase64(file).then(resolve).catch(reject);
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Resize if too large
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG with quality 0.8
+          canvas.toBlob(
+            (blob) => {
+              const compressedReader = new FileReader();
+              compressedReader.onload = () => resolve(compressedReader.result);
+              compressedReader.onerror = reject;
+              compressedReader.readAsDataURL(blob);
+            },
+            'image/jpeg',
+            0.8
+          );
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+  
   // Generate alamat domisili
   generateAlamatDomisili(nomorRumah) {
     return `${API_CONFIG.ALAMAT_RT} Blok ${nomorRumah}, Kelurahan ${API_CONFIG.KELURAHAN}, Kecamatan ${API_CONFIG.KECAMATAN}, Kota ${API_CONFIG.KOTA}`;

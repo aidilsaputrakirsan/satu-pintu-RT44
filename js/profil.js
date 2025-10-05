@@ -313,11 +313,12 @@ const Profil = {
         continue;
       }
       
-      const base64 = await Utils.fileToBase64(file);
+      // Compress image before adding
+      const base64 = await Utils.compressImage(file, 1024);
       const fileData = {
         name: file.name,
         data: base64,
-        type: file.type,
+        type: file.type.startsWith('image/') ? 'image/jpeg' : file.type,
         uploaded: false
       };
       
@@ -485,26 +486,44 @@ const Profil = {
     const user = Utils.getCurrentUser();
     const uploaded = [];
     
-    for (let file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
       if (file.uploaded) {
         uploaded.push(file);
         continue;
       }
       
-      const result = await API.uploadFile(
-        user.username,
-        file.data,
-        file.name,
-        file.type
-      );
-      
-      if (result.success) {
-        uploaded.push({
-          fileId: result.fileId,
-          fileUrl: result.fileUrl,
-          fileName: result.fileName,
-          uploaded: true
-        });
+      try {
+        // Show progress
+        Utils.showAlert(`Upload file ${i + 1} dari ${files.length}...`, 'info');
+        
+        const result = await API.uploadFile(
+          user.username,
+          file.data,
+          file.name,
+          file.type
+        );
+        
+        if (result.success) {
+          uploaded.push({
+            fileId: result.fileId,
+            fileUrl: result.fileUrl,
+            fileName: result.fileName,
+            uploaded: true
+          });
+        } else {
+          console.error('Upload failed:', result);
+          Utils.showAlert(`Gagal upload ${file.name}: ${result.message}`, 'warning');
+        }
+        
+        // Delay 500ms between uploads to avoid rate limit
+        if (i < files.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        Utils.showAlert(`Error upload ${file.name}: ${error.message}`, 'danger');
       }
     }
     
