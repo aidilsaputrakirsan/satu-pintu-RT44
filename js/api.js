@@ -1,5 +1,5 @@
 // ============================================
-// API.JS - API Service Layer (UPDATED)
+// API.JS - API Service Layer (FIXED)
 // ============================================
 
 const API = {
@@ -12,7 +12,9 @@ const API = {
       // Create callback function
       window[callbackName] = function(response) {
         delete window[callbackName];
-        document.body.removeChild(script);
+        if (document.body.contains(script)) {
+          document.body.removeChild(script);
+        }
         resolve(response);
       };
       
@@ -28,7 +30,9 @@ const API = {
       script.src = `${API_CONFIG.BASE_URL}?${params}`;
       script.onerror = () => {
         delete window[callbackName];
-        document.body.removeChild(script);
+        if (document.body.contains(script)) {
+          document.body.removeChild(script);
+        }
         reject(new Error('API call failed'));
       };
       
@@ -53,25 +57,29 @@ const API = {
   },
   
   async saveProfil(username, data) {
-    // Use POST for saveProfil (data bisa besar)
     return new Promise((resolve, reject) => {
+      // Create hidden iframe
+      const iframeName = 'save_iframe_' + Date.now();
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
-      iframe.name = 'save_iframe_' + Date.now();
+      iframe.name = iframeName;
       document.body.appendChild(iframe);
       
+      // Create form
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = API_CONFIG.BASE_URL;
-      form.target = iframe.name;
+      form.target = iframeName;
       form.style.display = 'none';
       
+      // Prepare payload
       const payload = {
         action: 'saveProfil',
         username: username,
         data: data
       };
       
+      // Add as textarea (better for large data)
       const input = document.createElement('textarea');
       input.name = 'data';
       input.value = JSON.stringify(payload);
@@ -80,38 +88,57 @@ const API = {
       document.body.appendChild(form);
       
       let responded = false;
-      iframe.onload = () => {
-        if (responded) return;
-        responded = true;
+      let checkCount = 0;
+      const maxChecks = 30;
+      
+      // Check iframe content periodically
+      const checkResponse = () => {
+        checkCount++;
         
         try {
-          const response = iframe.contentWindow.document.body.textContent;
-          const result = JSON.parse(response);
-          document.body.removeChild(form);
-          document.body.removeChild(iframe);
-          resolve(result);
+          const iframeDoc = iframe.contentWindow.document;
+          const response = iframeDoc.body.textContent;
+          
+          if (response && response.trim()) {
+            responded = true;
+            const result = JSON.parse(response);
+            cleanup();
+            resolve(result);
+          } else if (checkCount < maxChecks) {
+            setTimeout(checkResponse, 1000);
+          } else {
+            cleanup();
+            reject(new Error('Save timeout'));
+          }
         } catch (error) {
-          document.body.removeChild(form);
-          document.body.removeChild(iframe);
-          reject(error);
+          if (checkCount < maxChecks) {
+            setTimeout(checkResponse, 1000);
+          } else {
+            cleanup();
+            reject(error);
+          }
         }
       };
       
-      setTimeout(() => {
-        if (!responded) {
-          responded = true;
+      const cleanup = () => {
+        if (document.body.contains(form)) {
           document.body.removeChild(form);
-          document.body.removeChild(iframe);
-          reject(new Error('Save timeout'));
         }
-      }, 30000);
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      };
       
+      // Submit form
       form.submit();
+      
+      // Start checking after 2 seconds
+      setTimeout(checkResponse, 2000);
     });
   },
   
   // ============================================
-  // NEW: FILE UPLOAD WITH POLLING MECHANISM
+  // FILE UPLOAD WITH POLLING MECHANISM
   // ============================================
   
   async uploadFile(username, fileData, fileName, fileType, onProgress) {
@@ -120,12 +147,15 @@ const API = {
         // Generate unique upload ID
         const uploadId = 'upload_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         
+        console.log('Starting upload:', uploadId, fileName);
+        
         // Start upload (fire and forget)
         this._startUpload(uploadId, username, fileData, fileName, fileType);
         
         // Poll for status
         const maxAttempts = 60; // 60 attempts = 60 seconds max
         let attempts = 0;
+        let lastProgress = 0;
         
         const checkStatus = async () => {
           attempts++;
@@ -133,57 +163,68 @@ const API = {
           try {
             const status = await this.call('getUploadStatus', { uploadId });
             
+            console.log('Upload status check #' + attempts + ':', status);
+            
             if (status.success) {
               // Update progress callback
-              if (onProgress && status.progress) {
-                onProgress(status.progress, status.message);
+              if (onProgress && status.progress !== undefined) {
+                if (status.progress !== lastProgress) {
+                  onProgress(status.progress, status.message || '');
+                  lastProgress = status.progress;
+                }
               }
               
               if (status.status === 'completed') {
                 // Upload success
+                console.log('Upload completed:', status.result);
                 resolve(status.result);
               } else if (status.status === 'error') {
                 // Upload error
+                console.error('Upload error:', status.message);
                 reject(new Error(status.message));
               } else if (status.status === 'processing') {
                 // Still processing, check again
                 if (attempts < maxAttempts) {
                   setTimeout(checkStatus, 1000); // Check every 1 second
                 } else {
-                  reject(new Error('Upload timeout'));
+                  reject(new Error('Upload timeout after ' + maxAttempts + ' seconds'));
                 }
               }
             } else {
               // Status check failed
+              console.warn('Status check failed, retrying...', status);
               if (attempts < maxAttempts) {
-                setTimeout(checkStatus, 1000);
+                setTimeout(checkStatus, 1500);
               } else {
-                reject(new Error('Upload timeout or not found'));
+                reject(new Error('Upload status not found or timeout'));
               }
             }
           } catch (error) {
+            console.error('Status check error:', error);
             if (attempts < maxAttempts) {
-              setTimeout(checkStatus, 1000);
+              setTimeout(checkStatus, 1500);
             } else {
               reject(error);
             }
           }
         };
         
-        // Start checking status after 2 seconds
+        // Start checking status after 2 seconds (give time for backend to initialize)
         setTimeout(checkStatus, 2000);
         
       } catch (error) {
+        console.error('Upload initiation error:', error);
         reject(error);
       }
     });
   },
   
-  // Private: Start upload via POST (fire and forget)
+  // Private: Start upload via POST
   _startUpload(uploadId, username, fileData, fileName, fileType) {
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = API_CONFIG.BASE_URL;
+    form.target = '_blank'; // Open in new window to prevent navigation
     form.style.display = 'none';
     
     const payload = {
@@ -195,12 +236,15 @@ const API = {
       fileType: fileType
     };
     
+    // Use textarea for large data
     const input = document.createElement('textarea');
     input.name = 'data';
     input.value = JSON.stringify(payload);
     form.appendChild(input);
     
     document.body.appendChild(form);
+    
+    console.log('Submitting upload form for:', uploadId);
     form.submit();
     
     // Clean up form after submit
@@ -208,7 +252,7 @@ const API = {
       if (document.body.contains(form)) {
         document.body.removeChild(form);
       }
-    }, 1000);
+    }, 2000);
   },
   
   async deleteFile(fileId) {
@@ -243,3 +287,7 @@ const API = {
     return this.call('getAllWarga');
   }
 };
+
+// Export for debugging
+window.API = API;
+console.log('✅ API module loaded successfully');

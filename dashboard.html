@@ -61,6 +61,8 @@
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- App Scripts - IMPORTANT: Load in this order! -->
 <script src="js/config.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/api.js"></script>
@@ -69,14 +71,42 @@
 <script src="js/surat.js"></script>
 <script src="js/admin.js"></script>
 
+<!-- Check if all scripts loaded -->
+<script>
+(function() {
+  const requiredObjects = ['API_CONFIG', 'Utils', 'API', 'Auth', 'Profil', 'Surat', 'Admin'];
+  const missing = [];
+  
+  requiredObjects.forEach(obj => {
+    if (typeof window[obj] === 'undefined') {
+      missing.push(obj);
+    }
+  });
+  
+  if (missing.length > 0) {
+    console.error('❌ Missing required objects:', missing);
+    alert('Error: Gagal memuat scripts. Missing: ' + missing.join(', ') + '\n\nSilakan refresh halaman.');
+  } else {
+    console.log('✅ All required scripts loaded successfully');
+  }
+})();
+</script>
+
+<!-- Initialize Dashboard -->
 <script>
 // Override Utils.showLoading untuk halaman ini
 Utils.showLoading = function() {
-  document.getElementById('loadingOverlay').classList.add('active');
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.add('active');
+  }
 };
 
 Utils.hideLoading = function() {
-  document.getElementById('loadingOverlay').classList.remove('active');
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.remove('active');
+  }
 };
 
 // Initialize auth
@@ -84,6 +114,11 @@ Auth.init();
 
 // Get current user
 const currentUser = Utils.getCurrentUser();
+
+if (!currentUser) {
+  console.error('No user found, redirecting to login');
+  window.location.href = 'login.html';
+}
 
 // Render sidebar based on role
 function renderSidebar() {
@@ -255,13 +290,18 @@ function loadGantiPassword() {
 }
 
 // Initialize
-renderSidebar();
-
-// Check if profil belum lengkap, langsung load profil form
-if (currentUser.role === 'warga' && currentUser.status_profil === 'belum_lengkap') {
-  Profil.load();
-} else {
-  loadDashboard();
+try {
+  renderSidebar();
+  
+  // Check if profil belum lengkap, langsung load profil form
+  if (currentUser.role === 'warga' && currentUser.status_profil === 'belum_lengkap') {
+    Profil.load();
+  } else {
+    loadDashboard();
+  }
+} catch (error) {
+  console.error('Initialization error:', error);
+  Utils.showAlert('Error saat memuat dashboard: ' + error.message, 'danger');
 }
 </script>
 
