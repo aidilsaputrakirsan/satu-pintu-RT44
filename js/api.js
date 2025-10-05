@@ -258,6 +258,80 @@ const API = {
   async deleteFile(fileId) {
     return this.call('deleteFile', { fileId });
   },
+
+  async moveFile(username, fileId, fileName) {
+    return new Promise((resolve, reject) => {
+      const iframeName = 'move_iframe_' + Date.now();
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.name = iframeName;
+      document.body.appendChild(iframe);
+      
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = API_CONFIG.BASE_URL;
+      form.target = iframeName;
+      form.style.display = 'none';
+      
+      const payload = {
+        action: 'moveFile',
+        username: username,
+        fileId: fileId,
+        fileName: fileName
+      };
+      
+      const input = document.createElement('textarea');
+      input.name = 'data';
+      input.value = JSON.stringify(payload);
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      
+      let responded = false;
+      let checkCount = 0;
+      const maxChecks = 20;
+      
+      const checkResponse = () => {
+        checkCount++;
+        
+        try {
+          const iframeDoc = iframe.contentWindow.document;
+          const response = iframeDoc.body.textContent;
+          
+          if (response && response.trim()) {
+            responded = true;
+            const result = JSON.parse(response);
+            cleanup();
+            resolve(result);
+          } else if (checkCount < maxChecks) {
+            setTimeout(checkResponse, 1000);
+          } else {
+            cleanup();
+            reject(new Error('Move file timeout'));
+          }
+        } catch (error) {
+          if (checkCount < maxChecks) {
+            setTimeout(checkResponse, 1000);
+          } else {
+            cleanup();
+            reject(error);
+          }
+        }
+      };
+      
+      const cleanup = () => {
+        if (document.body.contains(form)) {
+          document.body.removeChild(form);
+        }
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      };
+      
+      form.submit();
+      setTimeout(checkResponse, 2000);
+    });
+  },
   
   // SURAT APIs
   async getMasterSurat() {

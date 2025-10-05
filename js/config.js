@@ -2,22 +2,21 @@
 // CONFIG.JS - API Configuration
 // ============================================
 
-// GANTI DENGAN WEB APP URL ANDA SETELAH DEPLOY
 const API_CONFIG = {
-  // Web App URL dari Google Apps Script
-  // Format: https://script.google.com/macros/s/[SCRIPT_ID]/exec
-  BASE_URL: 'https://script.google.com/macros/s/AKfycbxlFMVeQprC_PR7IyRuHBwGnj1xj1Xy-qIjcdLjbQuFO30LVgWbY0VS1Wfr7k5zsKal9Q/exec',
+  // GANTI dengan Web App URL Anda yang BARU setelah deploy
+  BASE_URL: 'https://script.google.com/macros/s/AKfycbzCzXEHPeZ4W7Bgl51XvRMwwO568LGdjP_gOBJ1NjQd6CC4DMb3_cexXhtr9NUDv4tKyA/exec',
   
-  // PENTING: Ganti YOUR_SCRIPT_ID_HERE dengan Script ID yang benar!
-  // Cara dapat Script ID:
-  // 1. Buka Apps Script project
-  // 2. Deploy → Manage deployments
-  // 3. Copy Web app URL
-  // 4. Paste di sini
+  // GOOGLE PICKER API - GANTI dengan credentials Anda
+  GOOGLE_API_KEY: 'AIzaSyB4gNsY74lh2g3kYFi_9YhARVkYeG8xw_A', // ← Paste API Key dari Step 1
+  GOOGLE_CLIENT_ID: '324059435791-rttlua6s1ia7pen2thg3c5i2g2n883le.apps.googleusercontent.com', // ← Paste Client ID dari Step 1
+  
+  // Google Drive Folder untuk upload
+  // Ini adalah FOLDER_ID dari Apps Script (parent folder Data Warga)
+  DRIVE_PARENT_FOLDER: '1snNDfiMlbmsRuc17jumBch_7P47n3dRr',
   
   // App Settings
   APP_NAME: 'Sistem Administrasi RT 44',
-  APP_VERSION: '1.0.0',
+  APP_VERSION: '2.0.0',
   
   // Local Storage Keys
   STORAGE_KEY: {

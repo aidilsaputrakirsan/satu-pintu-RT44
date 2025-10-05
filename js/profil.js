@@ -213,46 +213,44 @@ const Profil = {
             </div>
           </div>
         </div>
-        
+
         <!-- Upload Dokumen -->
         <div class="card mb-3">
           <div class="card-header bg-success text-white">
             <strong>F. Upload Dokumen <span class="text-warning">* Minimal 1 KTP + 1 KK</span></strong>
+            <br><small>Klik area di bawah untuk memilih file dari Google Drive Anda</small>
           </div>
           <div class="card-body">
             <!-- Upload KTP -->
             <div class="mb-4">
               <label class="form-label fw-bold">Upload KTP (bisa lebih dari 1)</label>
-              <div class="upload-area" onclick="document.getElementById('fileKTP').click()">
+              <div class="upload-area" id="ktpUploadArea" style="cursor: pointer;">
                 <i class="bi bi-cloud-upload"></i>
-                <p class="mb-0 mt-2">Klik untuk upload KTP</p>
+                <p class="mb-0 mt-2">Klik untuk pilih KTP dari Google Drive</p>
                 <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
               </div>
-              <input type="file" id="fileKTP" accept="image/*,.pdf" multiple class="d-none">
               <div id="previewKTP" class="mt-3"></div>
             </div>
             
             <!-- Upload KK -->
             <div class="mb-4">
               <label class="form-label fw-bold">Upload KK (bisa lebih dari 1)</label>
-              <div class="upload-area" onclick="document.getElementById('fileKK').click()">
+              <div class="upload-area" id="kkUploadArea" style="cursor: pointer;">
                 <i class="bi bi-cloud-upload"></i>
-                <p class="mb-0 mt-2">Klik untuk upload KK</p>
+                <p class="mb-0 mt-2">Klik untuk pilih KK dari Google Drive</p>
                 <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
               </div>
-              <input type="file" id="fileKK" accept="image/*,.pdf" multiple class="d-none">
               <div id="previewKK" class="mt-3"></div>
             </div>
             
             <!-- Upload KIA -->
             <div class="mb-4">
               <label class="form-label fw-bold">Upload KIA/Akta (Opsional)</label>
-              <div class="upload-area" onclick="document.getElementById('fileKIA').click()">
+              <div class="upload-area" id="kiaUploadArea" style="cursor: pointer;">
                 <i class="bi bi-cloud-upload"></i>
-                <p class="mb-0 mt-2">Klik untuk upload KIA</p>
+                <p class="mb-0 mt-2">Klik untuk pilih KIA dari Google Drive</p>
                 <small class="text-muted">JPG, PNG, PDF (Max 5MB)</small>
               </div>
-              <input type="file" id="fileKIA" accept="image/*,.pdf" multiple class="d-none">
               <div id="previewKIA" class="mt-3"></div>
             </div>
           </div>
@@ -269,6 +267,30 @@ const Profil = {
     
     // Event listeners
     document.getElementById('statusHunian').addEventListener('change', () => this.handleStatusHunian());
+        const ktpUploadArea = document.querySelector('[onclick*="fileKTP"]');
+        if (ktpUploadArea) {
+          ktpUploadArea.onclick = (e) => {
+            e.preventDefault();
+            this.handleFileUpload(e, 'ktp');
+          };
+        }
+
+        const kkUploadArea = document.querySelector('[onclick*="fileKK"]');
+        if (kkUploadArea) {
+          kkUploadArea.onclick = (e) => {
+            e.preventDefault();
+            this.handleFileUpload(e, 'kk');
+          };
+        }
+
+        const kiaUploadArea = document.querySelector('[onclick*="fileKIA"]');
+        if (kiaUploadArea) {
+          kiaUploadArea.onclick = (e) => {
+            e.preventDefault();
+            this.handleFileUpload(e, 'kia');
+          };
+        }
+
     document.getElementById('fileKTP').addEventListener('change', (e) => this.handleFileUpload(e, 'ktp'));
     document.getElementById('fileKK').addEventListener('change', (e) => this.handleFileUpload(e, 'kk'));
     document.getElementById('fileKIA').addEventListener('change', (e) => this.handleFileUpload(e, 'kia'));
@@ -304,32 +326,56 @@ const Profil = {
   },
   
   async handleFileUpload(event, type) {
-    const files = event.target.files;
+    event.preventDefault();
     
-    for (let file of files) {
-      const validation = Utils.validateFile(file);
-      if (!validation.valid) {
-        Utils.showAlert(validation.message, 'danger');
-        continue;
+    try {
+      // Open Google Picker
+      const pickedFile = await PickerHelper.uploadFile((progress, message) => {
+        console.log(`${progress}% - ${message}`);
+      });
+      
+      if (!pickedFile) {
+        return; // User cancelled
       }
       
-      // Compress image before adding
-      const base64 = await Utils.compressImage(file, 1024);
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(pickedFile.mimeType)) {
+        Utils.showAlert('Tipe file tidak didukung. Gunakan JPG, PNG, atau PDF', 'danger');
+        return;
+      }
+      
+      // Validate file size (optional, since it's from Drive)
+      if (pickedFile.sizeBytes && pickedFile.sizeBytes > API_CONFIG.MAX_FILE_SIZE) {
+        Utils.showAlert(`File terlalu besar. Maksimal ${API_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB`, 'danger');
+        return;
+      }
+      
+      // Add to appropriate array
       const fileData = {
-        name: file.name,
-        data: base64,
-        type: file.type.startsWith('image/') ? 'image/jpeg' : file.type,
-        uploaded: false
+        fileId: pickedFile.id,
+        fileName: pickedFile.name,
+        fileType: pickedFile.mimeType,
+        fileUrl: pickedFile.url,
+        iconUrl: pickedFile.iconUrl,
+        uploaded: false // Will be moved to RT folder on submit
       };
       
-      if (type === 'ktp') this.uploadedKTP.push(fileData);
-      else if (type === 'kk') this.uploadedKK.push(fileData);
-      else if (type === 'kia') this.uploadedKIA.push(fileData);
+      if (type === 'ktp') {
+        this.uploadedKTP.push(fileData);
+      } else if (type === 'kk') {
+        this.uploadedKK.push(fileData);
+      } else if (type === 'kia') {
+        this.uploadedKIA.push(fileData);
+      }
       
       this.renderFilePreview(type);
+      Utils.showAlert('File berhasil dipilih: ' + pickedFile.name, 'success');
+      
+    } catch (error) {
+      console.error('File selection error:', error);
+      Utils.showAlert('Error: ' + error.message, 'danger');
     }
-    
-    event.target.value = '';
   },
   
   renderFilePreview(type) {
@@ -499,6 +545,8 @@ const Profil = {
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 10000;
       min-width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
     `;
     document.body.appendChild(progressContainer);
     
@@ -512,42 +560,33 @@ const Profil = {
       }
       
       try {
-        // Create progress element for this file
+        // Create progress element
         const fileProgressId = 'fileProgress_' + i;
         const fileProgressHTML = `
           <div id="${fileProgressId}" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-              <small style="font-weight: bold;">${file.name}</small>
-              <small id="${fileProgressId}_percent" style="color: #666;">0%</small>
+            <div style="display: flex; justify-content-between; align-items: center; margin-bottom: 5px;">
+              <small style="font-weight: bold;">${file.fileName}</small>
+              <small id="${fileProgressId}_status" style="color: #666;">Memproses...</small>
             </div>
             <div style="background: #f0f0f0; height: 8px; border-radius: 4px; overflow: hidden;">
               <div id="${fileProgressId}_bar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
             </div>
-            <small id="${fileProgressId}_status" style="color: #999; font-size: 11px;">Memulai upload...</small>
           </div>
         `;
         
         progressContainer.insertAdjacentHTML('beforeend', fileProgressHTML);
         
-        // Upload with progress callback
-        const result = await API.uploadFile(
-          user.username,
-          file.data,
-          file.name,
-          file.type,
-          (progress, message) => {
-            // Update progress UI
-            const progressBar = document.getElementById(fileProgressId + '_bar');
-            const progressPercent = document.getElementById(fileProgressId + '_percent');
-            const progressStatus = document.getElementById(fileProgressId + '_status');
-            
-            if (progressBar) progressBar.style.width = progress + '%';
-            if (progressPercent) progressPercent.textContent = progress + '%';
-            if (progressStatus) progressStatus.textContent = message;
-          }
-        );
+        // Update progress
+        const progressBar = document.getElementById(fileProgressId + '_bar');
+        const statusEl = document.getElementById(fileProgressId + '_status');
         
-        if (result && result.fileId) {
+        if (progressBar) progressBar.style.width = '50%';
+        if (statusEl) statusEl.textContent = 'Memindahkan file...';
+        
+        // Call API to move file to RT folder
+        const result = await API.moveFile(user.username, file.fileId, file.fileName);
+        
+        if (result.success) {
           uploaded.push({
             fileId: result.fileId,
             fileUrl: result.fileUrl,
@@ -556,13 +595,13 @@ const Profil = {
           });
           
           // Mark as complete
-          const statusEl = document.getElementById(fileProgressId + '_status');
+          if (progressBar) progressBar.style.width = '100%';
           if (statusEl) {
-            statusEl.textContent = '✅ Upload berhasil';
+            statusEl.textContent = '✅ Selesai';
             statusEl.style.color = '#28a745';
           }
         } else {
-          throw new Error('Upload gagal - tidak ada response');
+          throw new Error(result.message || 'Gagal memindahkan file');
         }
         
       } catch (error) {
@@ -571,11 +610,11 @@ const Profil = {
         // Show error in progress UI
         const statusEl = document.getElementById('fileProgress_' + i + '_status');
         if (statusEl) {
-          statusEl.textContent = '❌ ' + error.message;
+          statusEl.textContent = '❌ Error';
           statusEl.style.color = '#dc3545';
         }
         
-        Utils.showAlert(`Error upload ${file.name}: ${error.message}`, 'danger');
+        Utils.showAlert(`Error: ${file.fileName} - ${error.message}`, 'danger');
       }
     }
     
