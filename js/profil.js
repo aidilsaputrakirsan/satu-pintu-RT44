@@ -291,9 +291,18 @@ const Profil = {
           };
         }
 
-    document.getElementById('fileKTP').addEventListener('change', (e) => this.handleFileUpload(e, 'ktp'));
-    document.getElementById('fileKK').addEventListener('change', (e) => this.handleFileUpload(e, 'kk'));
-    document.getElementById('fileKIA').addEventListener('change', (e) => this.handleFileUpload(e, 'kia'));
+    // Upload area click handlers - Google Picker
+    document.getElementById('ktpUploadArea').addEventListener('click', (e) => {
+      this.handleFileUpload(e, 'ktp');
+    });
+
+    document.getElementById('kkUploadArea').addEventListener('click', (e) => {
+      this.handleFileUpload(e, 'kk');
+    });
+
+    document.getElementById('kiaUploadArea').addEventListener('click', (e) => {
+      this.handleFileUpload(e, 'kia');
+    });
     document.getElementById('formProfil').addEventListener('submit', (e) => this.submit(e));
     
     this.handleStatusHunian();
