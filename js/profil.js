@@ -486,46 +486,105 @@ const Profil = {
     const user = Utils.getCurrentUser();
     const uploaded = [];
     
+    // Create progress container
+    const progressContainer = document.createElement('div');
+    progressContainer.id = 'uploadProgressContainer';
+    progressContainer.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      min-width: 300px;
+    `;
+    document.body.appendChild(progressContainer);
+    
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
+      // Skip if already uploaded
       if (file.uploaded) {
         uploaded.push(file);
         continue;
       }
       
       try {
-        // Show progress
-        Utils.showAlert(`Upload file ${i + 1} dari ${files.length}...`, 'info');
+        // Create progress element for this file
+        const fileProgressId = 'fileProgress_' + i;
+        const fileProgressHTML = `
+          <div id="${fileProgressId}" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <small style="font-weight: bold;">${file.name}</small>
+              <small id="${fileProgressId}_percent" style="color: #666;">0%</small>
+            </div>
+            <div style="background: #f0f0f0; height: 8px; border-radius: 4px; overflow: hidden;">
+              <div id="${fileProgressId}_bar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <small id="${fileProgressId}_status" style="color: #999; font-size: 11px;">Memulai upload...</small>
+          </div>
+        `;
         
+        progressContainer.insertAdjacentHTML('beforeend', fileProgressHTML);
+        
+        // Upload with progress callback
         const result = await API.uploadFile(
           user.username,
           file.data,
           file.name,
-          file.type
+          file.type,
+          (progress, message) => {
+            // Update progress UI
+            const progressBar = document.getElementById(fileProgressId + '_bar');
+            const progressPercent = document.getElementById(fileProgressId + '_percent');
+            const progressStatus = document.getElementById(fileProgressId + '_status');
+            
+            if (progressBar) progressBar.style.width = progress + '%';
+            if (progressPercent) progressPercent.textContent = progress + '%';
+            if (progressStatus) progressStatus.textContent = message;
+          }
         );
         
-        if (result.success) {
+        if (result && result.fileId) {
           uploaded.push({
             fileId: result.fileId,
             fileUrl: result.fileUrl,
             fileName: result.fileName,
             uploaded: true
           });
+          
+          // Mark as complete
+          const statusEl = document.getElementById(fileProgressId + '_status');
+          if (statusEl) {
+            statusEl.textContent = '✅ Upload berhasil';
+            statusEl.style.color = '#28a745';
+          }
         } else {
-          console.error('Upload failed:', result);
-          Utils.showAlert(`Gagal upload ${file.name}: ${result.message}`, 'warning');
+          throw new Error('Upload gagal - tidak ada response');
         }
         
-        // Delay 500ms between uploads to avoid rate limit
-        if (i < files.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
       } catch (error) {
         console.error('Upload error:', error);
+        
+        // Show error in progress UI
+        const statusEl = document.getElementById('fileProgress_' + i + '_status');
+        if (statusEl) {
+          statusEl.textContent = '❌ ' + error.message;
+          statusEl.style.color = '#dc3545';
+        }
+        
         Utils.showAlert(`Error upload ${file.name}: ${error.message}`, 'danger');
       }
     }
+    
+    // Remove progress container after 3 seconds
+    setTimeout(() => {
+      if (document.body.contains(progressContainer)) {
+        document.body.removeChild(progressContainer);
+      }
+    }, 3000);
     
     return uploaded;
   }

@@ -1,5 +1,5 @@
 // ============================================
-// API.JS - API Service Layer (JSONP)
+// API.JS - API Service Layer (UPDATED)
 // ============================================
 
 const API = {
@@ -110,70 +110,105 @@ const API = {
     });
   },
   
-  // FILE APIs - Use POST for file upload (large data)
-  async uploadFile(username, fileData, fileName, fileType) {
-    return new Promise((resolve, reject) => {
-      // Create hidden iframe for POST
-      let iframe = document.getElementById('upload_iframe');
-      if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'upload_iframe';
-        iframe.name = 'upload_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-      }
-      
-      // Create form
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = API_CONFIG.BASE_URL;
-      form.target = 'upload_iframe';
-      form.style.display = 'none';
-      
-      // Add data as hidden inputs
-      const payload = {
-        action: 'uploadFile',
-        username: username,
-        fileData: fileData,
-        fileName: fileName,
-        fileType: fileType
-      };
-      
-      const input = document.createElement('textarea');
-      input.name = 'data';
-      input.value = JSON.stringify(payload);
-      form.appendChild(input);
-      
-      document.body.appendChild(form);
-      
-      // Handle response
-      let responded = false;
-      iframe.onload = () => {
-        if (responded) return;
-        responded = true;
+  // ============================================
+  // NEW: FILE UPLOAD WITH POLLING MECHANISM
+  // ============================================
+  
+  async uploadFile(username, fileData, fileName, fileType, onProgress) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Generate unique upload ID
+        const uploadId = 'upload_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         
-        try {
-          const response = iframe.contentWindow.document.body.textContent;
-          const data = JSON.parse(response);
-          document.body.removeChild(form);
-          resolve(data);
-        } catch (error) {
-          document.body.removeChild(form);
-          reject(error);
-        }
-      };
-      
-      // Timeout after 30 seconds
-      setTimeout(() => {
-        if (!responded) {
-          responded = true;
-          document.body.removeChild(form);
-          reject(new Error('Upload timeout'));
-        }
-      }, 30000);
-      
-      form.submit();
+        // Start upload (fire and forget)
+        this._startUpload(uploadId, username, fileData, fileName, fileType);
+        
+        // Poll for status
+        const maxAttempts = 60; // 60 attempts = 60 seconds max
+        let attempts = 0;
+        
+        const checkStatus = async () => {
+          attempts++;
+          
+          try {
+            const status = await this.call('getUploadStatus', { uploadId });
+            
+            if (status.success) {
+              // Update progress callback
+              if (onProgress && status.progress) {
+                onProgress(status.progress, status.message);
+              }
+              
+              if (status.status === 'completed') {
+                // Upload success
+                resolve(status.result);
+              } else if (status.status === 'error') {
+                // Upload error
+                reject(new Error(status.message));
+              } else if (status.status === 'processing') {
+                // Still processing, check again
+                if (attempts < maxAttempts) {
+                  setTimeout(checkStatus, 1000); // Check every 1 second
+                } else {
+                  reject(new Error('Upload timeout'));
+                }
+              }
+            } else {
+              // Status check failed
+              if (attempts < maxAttempts) {
+                setTimeout(checkStatus, 1000);
+              } else {
+                reject(new Error('Upload timeout or not found'));
+              }
+            }
+          } catch (error) {
+            if (attempts < maxAttempts) {
+              setTimeout(checkStatus, 1000);
+            } else {
+              reject(error);
+            }
+          }
+        };
+        
+        // Start checking status after 2 seconds
+        setTimeout(checkStatus, 2000);
+        
+      } catch (error) {
+        reject(error);
+      }
     });
+  },
+  
+  // Private: Start upload via POST (fire and forget)
+  _startUpload(uploadId, username, fileData, fileName, fileType) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = API_CONFIG.BASE_URL;
+    form.style.display = 'none';
+    
+    const payload = {
+      action: 'uploadFile',
+      uploadId: uploadId,
+      username: username,
+      fileData: fileData,
+      fileName: fileName,
+      fileType: fileType
+    };
+    
+    const input = document.createElement('textarea');
+    input.name = 'data';
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+    
+    document.body.appendChild(form);
+    form.submit();
+    
+    // Clean up form after submit
+    setTimeout(() => {
+      if (document.body.contains(form)) {
+        document.body.removeChild(form);
+      }
+    }, 1000);
   },
   
   async deleteFile(fileId) {
